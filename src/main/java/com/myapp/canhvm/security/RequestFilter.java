@@ -35,7 +35,7 @@ public class RequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println("test log");
-            if (!Arrays.asList(URLIgnore.LOGIN, URLIgnore.LOGOUT).contains(request.getRequestURI())) {
+            if (!Arrays.asList(URLIgnore.LOGIN, URLIgnore.LOGOUT, URLIgnore.SIGN_IN).contains(request.getRequestURI())) {
                 String token = jwtTokenProvider.getTokenFromRequest(request);
                 String userName = jwtTokenProvider.getUserNameFromToken(token);
                 UserDetails userDetails = securityUserDetailsService.loadUserByUsername(userName);

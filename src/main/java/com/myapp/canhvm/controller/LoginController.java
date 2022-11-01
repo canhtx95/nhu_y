@@ -22,6 +22,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 public class LoginController {
     @Autowired
@@ -37,19 +39,24 @@ public class LoginController {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
     @PostMapping("/dang-nhap")
     public ApiResponse login(@RequestBody LoginRequest request) throws BaseException {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         SecurityUserDetails userDetails = (SecurityUserDetails) authentication.getPrincipal();
-        return ApiResponse.success("Login success",jwtTokenProvider.generateToken(userDetails));
+        return ApiResponse.success("Login success", jwtTokenProvider.generateToken(userDetails));
     }
 
     @PostMapping("/dang-ky")
     public ResponseEntity<Object> register(@RequestBody LoginRequest request) throws BaseException {
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));;
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(ApiResponse.fail("Username does exist"));
+        }
         return ResponseEntity.ok(userRepository.save(user));
     }
 
